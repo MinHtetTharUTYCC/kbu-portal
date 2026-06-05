@@ -6,9 +6,22 @@
 
 <h1 class="mb-4">Student Registration</h1>
 
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <strong>Please fix the errors below:</strong>
+        @foreach (var modelState in ViewData.ModelState.Values)
+        {
+            @foreach (var error in modelState.Errors)
+            {
+                <div>@error.ErrorMessage</div>
+            }
+        }
+    </div>
+}
+
 <form asp-action="Register" method="post">
     @Html.AntiForgeryToken()
-    <input type="hidden" name="returnUrl" value="@returnUrl" />
 
     <div class="row">
         <div class="col-md-6 mb-3">
@@ -34,6 +47,7 @@
             <label asp-for="Password" class="form-label"></label>
             <input asp-for="Password" class="form-control" />
             <span asp-validation-for="Password" class="text-danger"></span>
+            <small class="text-muted">Minimum 6 characters</small>
         </div>
         <div class="col-md-6 mb-3">
             <label asp-for="ConfirmPassword" class="form-label"></label>
@@ -45,17 +59,17 @@
     <div class="row">
         <div class="col-md-4 mb-3">
             <label asp-for="StudentId" class="form-label"></label>
-            <input asp-for="StudentId" class="form-control" />
+            <input asp-for="StudentId" class="form-control" placeholder="(optional)" />
             <span asp-validation-for="StudentId" class="text-danger"></span>
         </div>
         <div class="col-md-4 mb-3">
             <label asp-for="Faculty" class="form-label"></label>
-            <input asp-for="Faculty" class="form-control" />
+            <input asp-for="Faculty" class="form-control" placeholder="(optional)" />
             <span asp-validation-for="Faculty" class="text-danger"></span>
         </div>
         <div class="col-md-4 mb-3">
             <label asp-for="Major" class="form-label"></label>
-            <input asp-for="Major" class="form-control" />
+            <input asp-for="Major" class="form-control" placeholder="(optional)" />
             <span asp-validation-for="Major" class="text-danger"></span>
         </div>
     </div>

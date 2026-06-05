@@ -1,0 +1,67 @@
+@model GradeReportViewModel
+@{
+    ViewData["Title"] = "My Grades";
+}
+
+<h1 class="mb-4">My Grades</h1>
+
+@if (Model.Semesters.Count == 0)
+{
+    <div class="alert alert-info">No grades available yet.</div>
+}
+else
+{
+    @foreach (var semester in Model.Semesters)
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    Semester @semester.Semester, @semester.Year
+                    <span class="float-end badge bg-primary">GPA: @semester.GPA.ToString("F2")</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Course Code</th>
+                                <th>Course Name</th>
+                                <th class="text-center">Credits</th>
+                                <th class="text-center">Score</th>
+                                <th class="text-center">Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var grade in semester.Grades)
+                            {
+                                var gradeBg = grade.LetterGrade switch
+                                {
+                                    "A" => "success",
+                                    "B" => "info",
+                                    "C" => "warning",
+                                    "D" => "warning",
+                                    "F" => "danger",
+                                    _ => "secondary"
+                                };
+
+                                <tr>
+                                    <td><strong>@grade.SubjectCode</strong></td>
+                                    <td>@grade.SubjectName</td>
+                                    <td class="text-center">@grade.Credits</td>
+                                    <td class="text-center">@grade.Score.ToString("F2")</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-@gradeBg">@grade.LetterGrade</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-muted small">
+                    Total Credits: @semester.TotalCredits
+                </div>
+            </div>
+        </div>
+    }
+}

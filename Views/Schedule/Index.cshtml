@@ -1,0 +1,63 @@
+@model WeeklyScheduleViewModel
+@{
+    ViewData["Title"] = "My Schedule";
+}
+
+<h1 class="mb-4">My Schedule</h1>
+
+@if (Model.Schedule.Count == 0)
+{
+    <div class="alert alert-info">No scheduled classes yet.</div>
+}
+else
+{
+    <div class="row">
+        @{
+            var dayOrder = new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday };
+            var groupedByDay = Model.Schedule.GroupBy(s => s.DayOfWeek).ToDictionary(g => g.Key, g => g.OrderBy(x => x.StartTime).ToList());
+        }
+
+        @foreach (var day in dayOrder)
+        {
+            <div class="col-12 col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">@day.ToString()</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (!groupedByDay.ContainsKey(day) || groupedByDay[day].Count == 0)
+                        {
+                            <p class="text-muted p-3 mb-0">No classes</p>
+                        }
+                        else
+                        {
+                            <ul class="list-group list-group-flush">
+                                @foreach (var item in groupedByDay[day])
+                                {
+                                    <li class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>@item.SubjectCode</strong>
+                                                <br />
+                                                <span class="text-muted">@item.SubjectName</span>
+                                                <br />
+                                                <small class="text-secondary">@item.TeacherName</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="badge bg-info">
+                                                    @item.StartTime.ToString("hh\\:mm") - @item.EndTime.ToString("hh\\:mm")
+                                                </div>
+                                                <br />
+                                                <small class="text-secondary">Room @item.Room</small>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

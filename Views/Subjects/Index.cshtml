@@ -1,0 +1,55 @@
+@model IReadOnlyList<SubjectViewModel>
+@{
+    ViewData["Title"] = "Subjects";
+    var statusMessage = TempData["StatusMessage"] as string;
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="mb-0">Subjects</h1>
+    <a asp-action="Create" class="btn btn-primary">New subject</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(statusMessage))
+{
+    <div class="alert alert-success">@statusMessage</div>
+}
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">No subjects yet.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Credits</th>
+                    <th>Teacher</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><strong>@item.Code</strong></td>
+                        <td>@item.Name</td>
+                        <td><span class="badge bg-info">@item.Credits</span></td>
+                        <td>@item.TeacherName</td>
+                        <td class="text-end">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <a asp-controller="StudentSubjects" asp-action="AssignStudents" asp-route-subjectId="@item.Id" class="btn btn-sm btn-outline-info">Assign</a>
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
