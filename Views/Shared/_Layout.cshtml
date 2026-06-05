@@ -55,8 +55,16 @@
                         @if (User.Identity?.IsAuthenticated ?? false)
                         {
                             <li class="nav-item me-2">
-                                <span class="navbar-text">Hello, @User.Identity?.Name</span>
+                                <a class="nav-link text-dark" asp-controller="Profile" asp-action="Index">
+                                    <span class="me-1">👤</span>@User.Identity?.Name
+                                </a>
                             </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Dashboard">Dashboard</a>
+                                </li>
+                            }
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                     @Html.AntiForgeryToken()

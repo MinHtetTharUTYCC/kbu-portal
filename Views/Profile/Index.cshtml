@@ -1,0 +1,102 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                @if (!string.IsNullOrWhiteSpace(Model.ProfilePhoto))
+                {
+                    <img src="@Model.ProfilePhoto" alt="Profile" class="img-fluid rounded-circle mb-3" style="max-width: 150px; height: 150px; object-fit: cover;" />
+                }
+                else
+                {
+                    <div class="bg-light rounded-circle mx-auto mb-3" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;">
+                        <span class="text-muted">No photo</span>
+                    </div>
+                }
+                <h5>@Model.FirstName @Model.LastName</h5>
+                <p class="text-muted">@Model.Email</p>
+                <span class="badge bg-primary">@Model.Role</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Edit Profile</h5>
+            </div>
+            <div class="card-body">
+                @if (TempData["StatusMessage"] is string message)
+                {
+                    <div class="alert alert-success">@message</div>
+                }
+
+                <form asp-action="Update" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="Email" />
+                    <input type="hidden" asp-for="Role" />
+                    <input type="hidden" asp-for="ProfilePhoto" />
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FirstName" class="form-label"></label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="LastName" class="form-label"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" disabled />
+                        <small class="text-muted">Email cannot be changed</small>
+                    </div>
+
+                    @if (Model.Role == "Student")
+                    {
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="StudentId" class="form-label"></label>
+                                <input asp-for="StudentId" class="form-control" />
+                                <span asp-validation-for="StudentId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Faculty" class="form-label"></label>
+                                <input asp-for="Faculty" class="form-control" />
+                                <span asp-validation-for="Faculty" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Major" class="form-label"></label>
+                                <input asp-for="Major" class="form-control" />
+                                <span asp-validation-for="Major" class="text-danger"></span>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label asp-for="PhotoFile" class="form-label">Profile Photo</label>
+                        <input asp-for="PhotoFile" class="form-control" type="file" accept="image/*" />
+                        <small class="text-muted">JPG, PNG, or GIF (optional)</small>
+                        <span asp-validation-for="PhotoFile" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-link">Back</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
