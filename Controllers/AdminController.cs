@@ -1,4 +1,5 @@
 using KbuPortal.Data;
+using KbuPortal.Models;
 using kbu_portal.ViewModels.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

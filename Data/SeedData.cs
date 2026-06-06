@@ -159,14 +159,15 @@ public static class SeedData
         if (!db.Grades.Any())
         {
             var currentYear = DateTime.Now.Year;
+            var subjects = db.Subjects.ToList();
             var grades = new[]
             {
-                (studentId: students[0].Id, subjectId: 1, score: 92m, semester: 1),
-                (studentId: students[0].Id, subjectId: 2, score: 88m, semester: 1),
-                (studentId: students[1].Id, subjectId: 1, score: 75m, semester: 1),
-                (studentId: students[1].Id, subjectId: 2, score: 82m, semester: 1),
-                (studentId: students[2].Id, subjectId: 1, score: 95m, semester: 1),
-                (studentId: students[2].Id, subjectId: 3, score: 89m, semester: 1),
+                (studentId: students[0].Id, subjectId: subjects[0].Id, score: 92m, semester: 1),
+                (studentId: students[0].Id, subjectId: subjects[1].Id, score: 88m, semester: 1),
+                (studentId: students[1].Id, subjectId: subjects[0].Id, score: 75m, semester: 1),
+                (studentId: students[1].Id, subjectId: subjects[1].Id, score: 82m, semester: 1),
+                (studentId: students[2].Id, subjectId: subjects[0].Id, score: 95m, semester: 1),
+                (studentId: students[2].Id, subjectId: subjects[2].Id, score: 89m, semester: 1),
             };
 
             foreach (var (studentId, subjectId, score, semester) in grades)
