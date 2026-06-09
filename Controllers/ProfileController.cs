@@ -9,6 +9,16 @@ namespace kbu_portal.Controllers;
 [Authorize]
 public class ProfileController : Controller
 {
+    private const long MaxProfilePhotoBytes = 2 * 1024 * 1024;
+    private static readonly HashSet<string> AllowedProfilePhotoExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".webp"
+    };
+
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IWebHostEnvironment _webHostEnvironment;
 
@@ -62,9 +72,7 @@ public class ProfileController : Controller
 
         if (!ModelState.IsValid)
         {
-            var roles = await _userManager.GetRolesAsync(user);
-            model.Role = roles.FirstOrDefault() ?? "Student";
-            model.ProfilePhoto = user.ProfilePhoto;
+            await PopulateProfileMetadataAsync(user, model);
             return View("Index", model);
         }
 
@@ -74,13 +82,27 @@ public class ProfileController : Controller
         user.Faculty = model.Faculty;
         user.Major = model.Major;
 
-        // Handle photo upload
         if (model.PhotoFile != null && model.PhotoFile.Length > 0)
         {
+            var extension = Path.GetExtension(model.PhotoFile.FileName);
+            if (!AllowedProfilePhotoExtensions.Contains(extension))
+            {
+                ModelState.AddModelError(nameof(model.PhotoFile), "Upload a JPG, PNG, GIF, or WebP image.");
+                await PopulateProfileMetadataAsync(user, model);
+                return View("Index", model);
+            }
+
+            if (model.PhotoFile.Length > MaxProfilePhotoBytes)
+            {
+                ModelState.AddModelError(nameof(model.PhotoFile), "Profile photo must be 2 MB or smaller.");
+                await PopulateProfileMetadataAsync(user, model);
+                return View("Index", model);
+            }
+
             var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
             Directory.CreateDirectory(uploadsFolder);
 
-            var fileName = $"{user.Id}_{Guid.NewGuid()}_{Path.GetFileName(model.PhotoFile.FileName)}";
+            var fileName = $"{user.Id}_{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
             var filePath = Path.Combine(uploadsFolder, fileName);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
@@ -103,10 +125,16 @@ public class ProfileController : Controller
             ModelState.AddModelError(string.Empty, error.Description);
         }
 
-        var roles2 = await _userManager.GetRolesAsync(user);
-        model.Role = roles2.FirstOrDefault() ?? "Student";
-        model.ProfilePhoto = user.ProfilePhoto;
+        await PopulateProfileMetadataAsync(user, model);
 
         return View("Index", model);
+    }
+
+    private async Task PopulateProfileMetadataAsync(ApplicationUser user, ProfileViewModel model)
+    {
+        var roles = await _userManager.GetRolesAsync(user);
+        model.Role = roles.FirstOrDefault() ?? "Student";
+        model.Email = user.Email ?? string.Empty;
+        model.ProfilePhoto = user.ProfilePhoto;
     }
 }
