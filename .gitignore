@@ -1,3 +1,7 @@
 .vs/
 bin/
 obj/
+KBUPortal.db
+KBUPortal.db-shm
+KBUPortal.db-wal
+.mimocode/
