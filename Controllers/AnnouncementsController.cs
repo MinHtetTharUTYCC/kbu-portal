@@ -4,6 +4,7 @@ using kbu_portal.ViewModels.Announcements;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace kbu_portal.Controllers;
@@ -21,28 +22,38 @@ public class AnnouncementsController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? search, string? roleFilter)
     {
-        string? roleFilter = null;
-
-        if (User.IsInRole("Teacher"))
-        {
-            roleFilter = "Teacher";
-        }
-        else if (User.IsInRole("Student"))
-        {
-            roleFilter = "Student";
-        }
-
         var query = _db.Announcements
             .AsNoTracking()
             .Include(a => a.CreatedBy)
             .AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(roleFilter))
+        if (User.IsInRole("Teacher"))
         {
-            query = query.Where(a => a.TargetRole == "All" || a.TargetRole == roleFilter);
+            query = query.Where(a => a.TargetRole == "All" || a.TargetRole == "Teacher");
         }
+        else if (User.IsInRole("Student"))
+        {
+            query = query.Where(a => a.TargetRole == "All" || a.TargetRole == "Student");
+        }
+
+        if (!string.IsNullOrWhiteSpace(roleFilter) && roleFilter != "All")
+        {
+            if (User.IsInRole("Admin"))
+            {
+                query = query.Where(a => a.TargetRole == roleFilter);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(a => a.Title.Contains(term) || a.Content.Contains(term));
+        }
+
+        ViewBag.Search = search;
+        ViewBag.RoleFilter = GetRoleFilterOptions(roleFilter);
 
         var announcements = await query
             .OrderByDescending(a => a.IsPinned)
@@ -61,6 +72,32 @@ public class AnnouncementsController : Controller
             .ToListAsync();
 
         return View(announcements);
+    }
+
+    private List<SelectListItem> GetRoleFilterOptions(string? selected)
+    {
+        var options = new List<string> { "All" };
+
+        if (User.IsInRole("Admin"))
+        {
+            options.Add("Student");
+            options.Add("Teacher");
+        }
+        else if (User.IsInRole("Teacher"))
+        {
+            options.Add("Teacher");
+        }
+        else if (User.IsInRole("Student"))
+        {
+            options.Add("Student");
+        }
+
+        return options.Select(r => new SelectListItem
+        {
+            Value = r,
+            Text = r,
+            Selected = r == (selected ?? "All")
+        }).ToList();
     }
 
     [Authorize(Roles = "Admin")]

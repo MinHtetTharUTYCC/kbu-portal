@@ -51,6 +51,12 @@ public class SubjectsController : Controller
         return View(new SubjectViewModel());
     }
 
+    [HttpGet]
+    public IActionResult Test()
+    {
+        return View();
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(SubjectViewModel model)
@@ -127,53 +133,53 @@ public class SubjectsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, SubjectViewModel model)
+    public async Task<IActionResult> Edit(int id, SubjectViewModel modelToUpdate)
     {
-        if (id != model.Id)
+        if (id != modelToUpdate.Id)
         {
             return BadRequest();
         }
 
         if (!ModelState.IsValid)
         {
-            await PopulateTeacherDropdown(model.TeacherId);
-            return View(model);
+            await PopulateTeacherDropdown(modelToUpdate.TeacherId);
+            return View(modelToUpdate);
         }
 
-        var subject = await _db.Subjects.FindAsync(id);
-        if (subject == null)
+        var existingSubject = await _db.Subjects.FindAsync(id);
+        if (existingSubject == null)
         {
             return NotFound();
         }
 
         // Verify teacher exists if provided
-        if (!string.IsNullOrWhiteSpace(model.TeacherId) && model.TeacherId != subject.TeacherId)
+        if (!string.IsNullOrWhiteSpace(modelToUpdate.TeacherId) && modelToUpdate.TeacherId != existingSubject.TeacherId)
         {
-            var teacher = await _userManager.FindByIdAsync(model.TeacherId);
+            var teacher = await _userManager.FindByIdAsync(modelToUpdate.TeacherId);
             if (teacher == null || !await _userManager.IsInRoleAsync(teacher, "Teacher"))
             {
-                ModelState.AddModelError(nameof(model.TeacherId), "Invalid teacher.");
-                await PopulateTeacherDropdown(subject.TeacherId);
-                return View(model);
+                ModelState.AddModelError(nameof(modelToUpdate.TeacherId), "Invalid teacher.");
+                await PopulateTeacherDropdown(existingSubject.TeacherId);
+                return View(modelToUpdate);
             }
         }
 
         // Check for duplicate code if changed
-        if (model.Code != subject.Code)
+        if (modelToUpdate.Code != existingSubject.Code)
         {
-            var exists = await _db.Subjects.AnyAsync(s => s.Code == model.Code && s.Id != id);
+            var exists = await _db.Subjects.AnyAsync(s => s.Code == modelToUpdate.Code && s.Id != id);
             if (exists)
             {
-                ModelState.AddModelError(nameof(model.Code), "Subject code already exists.");
-                await PopulateTeacherDropdown(model.TeacherId);
-                return View(model);
+                ModelState.AddModelError(nameof(modelToUpdate.Code), "Subject code already exists.");
+                await PopulateTeacherDropdown(modelToUpdate.TeacherId);
+                return View(modelToUpdate);
             }
         }
 
-        subject.Name = model.Name;
-        subject.Code = model.Code;
-        subject.Credits = model.Credits;
-        subject.TeacherId = string.IsNullOrWhiteSpace(model.TeacherId) ? null : model.TeacherId;
+        existingSubject.Name = modelToUpdate.Name;
+        existingSubject.Code = modelToUpdate.Code;
+        existingSubject.Credits = modelToUpdate.Credits;
+        existingSubject.TeacherId = string.IsNullOrWhiteSpace(modelToUpdate.TeacherId) ? null : modelToUpdate.TeacherId;
 
         await _db.SaveChangesAsync();
 

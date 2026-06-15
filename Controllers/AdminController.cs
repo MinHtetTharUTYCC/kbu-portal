@@ -29,6 +29,9 @@ public class AdminController : Controller
         var totalSubjects = await _db.Subjects.CountAsync();
         var totalAnnouncements = await _db.Announcements.CountAsync();
 
+        var totalStudents = students.Count;
+        var totalTeachers = teachers.Count;
+
         var recentAnnouncements = await _db.Announcements
             .AsNoTracking()
             .Include(a => a.CreatedBy)
@@ -64,8 +67,8 @@ public class AdminController : Controller
 
         var model = new AdminDashboardViewModel
         {
-            TotalStudents = students.Count,
-            TotalTeachers = teachers.Count,
+            TotalStudents = totalStudents,
+            TotalTeachers = totalTeachers,
             TotalSubjects = totalSubjects,
             TotalAnnouncements = totalAnnouncements,
             RecentAnnouncements = recentAnnouncements,

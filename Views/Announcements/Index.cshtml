@@ -16,10 +16,23 @@
 {
     <div class="alert alert-success">@statusMessage</div>
 }
+what i
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-6">
+        <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Search announcements..." />
+    </div>
+    <div class="col-md-3">
+        <select name="roleFilter" asp-items="@ViewBag.RoleFilter" class="form-select"></select>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-outline-secondary">Filter</button>
+        <a asp-action="Index" class="btn btn-link">Clear</a>
+    </div>
+</form>
 
 @if (Model.Count == 0)
 {
-    <div class="alert alert-info">No announcements yet.</div>
+    <div class="alert alert-info">No announcements found.</div>
 }
 else
 {
